@@ -1,0 +1,2 @@
+- [ ] Read Chubby paper
+- [ ] Get Raft working
