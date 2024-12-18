@@ -11,7 +11,7 @@ I am going to start by figuring out RPC calls first as they seem important for b
 I then plan on building RAFT, hopefully in such a way that it is easy to implement Chubby on top of this.
 
 
-### Open questions/things to explore
+## Open questions/things to explore:
 - [x] RPCs feel like the right way of doing this, but I don't really know why? I think they are faster than making some sort of REST API but can't really justify why this is the case.
     - I think the order of performant ways for remote services to communicate is (fastest to slowest) sockets > RPCs > REST. 
     - The reason for RPCs being faster than REST is to do with how data is serialised (binary with RPCs and Protobufs vs text-based JSON for REST) and connection reuse (RPCs using http2 which supports connection reuse whereas REST using http1.1 which does not). The reason TCP sockets are faster than both of these is that they are a transport layer protocol compared to an application layer protocol and as such do not incur any of the costs of packaging data into http packets, processing headers etc.
