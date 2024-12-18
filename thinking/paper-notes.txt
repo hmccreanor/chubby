@@ -1,0 +1,61 @@
+Clients -> Library -> Servers
+
+Writes and reads served by master node (basically just raft)
+
+How to find master node:
+- DNS contains IPs of Chubby servers, clients request master IP and non-master servers will return master IP
+
+File naming convention:
+ls/cell/normal/unix/naming/stuff
+
+Files + directories are called nodes. Nodes may be permanent or ephemeral (deleted if no client has them open)
+
+Node metadata:
+- Contains three pointers to access control lists (ACLs) for reading, writing and changing ACL names for nodes respectively
+  - Access control lists are stored in a special acl directory and specify access control properties for different users
+- Four monotonically increasing numbers
+  - Instance number, used to specify version of a node for whom another node with the same name has already existed
+  - Content generation number, increases when file content is written to
+  - Lock generation number, increases when node's lock transitions from free to held
+  - ACL generation number, increases when ACL for this node is written to 
+
+When nodes are accessed by a client, a handle is returned (similar idea to UNIX file descriptor)
+
+Locks can be write/exclusive or read/shared
+
+Sequencers:
+- Means of replacing sequence numbers/only using sequence numbers in situations where we require protection by a lock
+- Lock holders (i.e client applications) can request a sequencer from Chubby. This is a byte-string containing the state of the lock after acquisition (lock generation number, lock name, whether the lock was exclusive or shared)
+- Lock holders can then send this sequencer to other services who can then verify that the sequencer corresponds to the current state of the lock in Chubby 
+
+Lock delay:
+- Locks are immediately available for acquisition after a client releases them
+- Locks are made unavailable for acquisition for a given period of time (the lock delay) if the client holding the lock has failed
+
+Events:
+- When creating a handle, clients can request updates delivered by the library on a range of events (e.g node is written to, lock on node is acquired etc.)
+
+API:
+- Handle creation/deletion
+  - open() 
+    - Returns a handle
+    - Client can specify options
+      - How the handle will be used (read/write/lock/changing acl)
+      - Events to subscribe to
+      - Lock delay
+      - ...
+  - close()
+    - Closes handle
+    - Further use of handle not permitted
+  - poison()
+    - Causes outstanding/future uses of handle to fail without closing it
+    - Allows client to stop threads using handle without fear of deallocating memory being accessed by them?? 
+- Node operations
+  - GetContents
+  - SetContents
+  - Acquire/Release
+  - GetSequencer
+  - ...
+
+Caching
+- There is some caching that goes on on the client end. This looks a bit involved so I will probably reread this when/if I add caching to my implementation
