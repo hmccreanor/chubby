@@ -59,3 +59,4 @@ API:
 
 Caching
 - There is some caching that goes on on the client end. This looks a bit involved so I will probably reread this when/if I add caching to my implementation
+- I think what happens is that clients cache file data/node metadata locally in a write-through cache. The master cell is then responsible for keeping track of what every client is caching and invalidating it. 
